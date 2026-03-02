@@ -11,10 +11,12 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<ReviewResult | null>(null)
   const [isDemo, setIsDemo] = useState(false)
+  const [error, setError] = useState('')
 
   const handleReset = () => {
     setResult(null)
     setIsDemo(false)
+    setError('')
   }
 
   const handleDemo = () => {
@@ -59,7 +61,16 @@ export default function Home() {
           <ReviewResultView result={result} onReset={handleReset} />
         ) : (
           <div className="bg-card border rounded-2xl p-6 shadow-sm">
-            <UploadForm onResult={setResult} onLoading={setLoading} />
+            <UploadForm
+              onResult={setResult}
+              onLoading={(v) => { setLoading(v); if (v) setError('') }}
+              onError={setError}
+            />
+            {error && (
+              <p className="mt-4 text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-4 py-2 rounded-lg">
+                {error}
+              </p>
+            )}
           </div>
         )}
 

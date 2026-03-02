@@ -1,3 +1,5 @@
+export const runtime = 'nodejs'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { reviewContract } from '@/lib/ai-review'
 import { extractTextFromFile } from '@/lib/parse-file'

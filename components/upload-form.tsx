@@ -9,14 +9,15 @@ import { ReviewResult } from '@/lib/ai-review'
 interface UploadFormProps {
   onResult: (result: ReviewResult) => void
   onLoading: (loading: boolean) => void
+  onError: (error: string) => void
 }
 
-export function UploadForm({ onResult, onLoading }: UploadFormProps) {
+export function UploadForm({ onResult, onLoading, onError }: UploadFormProps) {
   const [dragging, setDragging] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [pastedText, setPastedText] = useState('')
   const [language, setLanguage] = useState<'vi' | 'en'>('vi')
-  const [error, setError] = useState('')
+  const [fileError, setFileError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleDragOver = (e: DragEvent) => {
@@ -39,21 +40,21 @@ export function UploadForm({ onResult, onLoading }: UploadFormProps) {
   }
 
   const validateAndSetFile = (file: File) => {
-    setError('')
+    setFileError('')
     const ext = file.name.split('.').pop()?.toLowerCase()
     if (!['pdf', 'docx', 'doc'].includes(ext || '')) {
-      setError('Chỉ hỗ trợ file PDF hoặc DOCX.')
+      setFileError('Chỉ hỗ trợ file PDF hoặc DOCX.')
       return
     }
     if (file.size > 4 * 1024 * 1024) {
-      setError('File quá lớn. Tối đa 4MB. Với file lớn hơn, hãy copy nội dung và dùng tab Paste Text.')
+      setFileError('File quá lớn. Tối đa 4MB. Với file lớn hơn, hãy copy nội dung và dùng tab Paste Text.')
       return
     }
     setSelectedFile(file)
   }
 
   const handleSubmit = async (mode: 'file' | 'text') => {
-    setError('')
+    onError('')
     onLoading(true)
 
     try {
@@ -65,7 +66,7 @@ export function UploadForm({ onResult, onLoading }: UploadFormProps) {
       } else if (mode === 'text' && pastedText.trim()) {
         formData.append('text', pastedText)
       } else {
-        setError(mode === 'file' ? 'Vui lòng chọn file' : 'Vui lòng nhập nội dung hợp đồng')
+        onError(mode === 'file' ? 'Vui lòng chọn file.' : 'Vui lòng nhập nội dung hợp đồng.')
         onLoading(false)
         return
       }
@@ -77,21 +78,21 @@ export function UploadForm({ onResult, onLoading }: UploadFormProps) {
       try {
         data = await res.json()
       } catch {
-        setError(`Lỗi ${res.status}: Server trả về phản hồi không hợp lệ.`)
+        onError(`Lỗi ${res.status}: Server trả về phản hồi không hợp lệ.`)
         return
       }
 
       if (!res.ok) {
-        setError(data?.error || `Lỗi ${res.status}: Đã xảy ra lỗi không xác định.`)
+        onError(data?.error || `Lỗi ${res.status}: Đã xảy ra lỗi không xác định.`)
         return
       }
 
       onResult(data as ReviewResult)
     } catch (err) {
       if (err instanceof TypeError && err.message.includes('fetch')) {
-        setError('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.')
+        onError('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.')
       } else {
-        setError('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.')
+        onError('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.')
       }
     } finally {
       onLoading(false)
@@ -195,9 +196,9 @@ export function UploadForm({ onResult, onLoading }: UploadFormProps) {
         </TabsContent>
       </Tabs>
 
-      {error && (
+      {fileError && (
         <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-4 py-2 rounded-lg">
-          {error}
+          {fileError}
         </p>
       )}
     </div>
