@@ -1,6 +1,7 @@
 export async function parsePDF(buffer: Buffer): Promise<string> {
+  // Import directly from lib to avoid Vercel bundler loading the test file which triggers DOMMatrix error
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfParse = require('pdf-parse') as (buf: Buffer) => Promise<{ text: string }>
+  const pdfParse = require('pdf-parse/lib/pdf-parse') as (buf: Buffer) => Promise<{ text: string }>
   const data = await pdfParse(buffer)
   return data.text
 }

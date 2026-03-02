@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { reviewContract } from '@/lib/ai-review'
 import { extractTextFromFile } from '@/lib/parse-file'
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const MAX_FILE_SIZE = 4 * 1024 * 1024
 
 export async function POST(req: NextRequest) {
   try {

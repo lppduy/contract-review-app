@@ -42,11 +42,11 @@ export function UploadForm({ onResult, onLoading }: UploadFormProps) {
     setError('')
     const ext = file.name.split('.').pop()?.toLowerCase()
     if (!['pdf', 'docx', 'doc'].includes(ext || '')) {
-      setError('Chỉ hỗ trợ file PDF hoặc DOCX')
+      setError('Chỉ hỗ trợ file PDF hoặc DOCX.')
       return
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setError('File quá lớn. Tối đa 10MB.')
+    if (file.size > 4 * 1024 * 1024) {
+      setError('File quá lớn. Tối đa 4MB. Với file lớn hơn, hãy copy nội dung và dùng tab Paste Text.')
       return
     }
     setSelectedFile(file)
@@ -71,16 +71,28 @@ export function UploadForm({ onResult, onLoading }: UploadFormProps) {
       }
 
       const res = await fetch('/api/review', { method: 'POST', body: formData })
-      const data = await res.json()
 
-      if (!res.ok) {
-        setError(data.error || 'Có lỗi xảy ra')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let data: any
+      try {
+        data = await res.json()
+      } catch {
+        setError(`Lỗi ${res.status}: Server trả về phản hồi không hợp lệ.`)
         return
       }
 
-      onResult(data)
-    } catch {
-      setError('Không thể kết nối đến server. Vui lòng thử lại.')
+      if (!res.ok) {
+        setError(data?.error || `Lỗi ${res.status}: Đã xảy ra lỗi không xác định.`)
+        return
+      }
+
+      onResult(data as ReviewResult)
+    } catch (err) {
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setError('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.')
+      } else {
+        setError('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.')
+      }
     } finally {
       onLoading(false)
     }
@@ -139,7 +151,7 @@ export function UploadForm({ onResult, onLoading }: UploadFormProps) {
               <div>
                 <p className="font-medium">Kéo thả file vào đây</p>
                 <p className="text-sm text-muted-foreground mt-1">hoặc click để chọn file</p>
-                <p className="text-xs text-muted-foreground mt-2">PDF, DOCX — tối đa 10MB</p>
+                <p className="text-xs text-muted-foreground mt-2">PDF, DOCX — tối đa 4MB</p>
               </div>
             )}
             <input
