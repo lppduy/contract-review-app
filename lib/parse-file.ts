@@ -1,20 +1,8 @@
-// pdfjs-dist (used internally by pdf-parse) requires DOMMatrix which is a browser API.
-// Polyfill it before loading pdf-parse so it works in Node.js serverless environments.
-if (typeof (globalThis as Record<string, unknown>).DOMMatrix === 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ;(globalThis as any).DOMMatrix = class DOMMatrix {
-    static fromMatrix() { return new DOMMatrix() }
-    static fromFloat32Array() { return new DOMMatrix() }
-    static fromFloat64Array() { return new DOMMatrix() }
-    constructor(_init?: unknown) {}
-  }
-}
+import { extractText } from 'unpdf'
 
 export async function parsePDF(buffer: Buffer): Promise<string> {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfParse = require('pdf-parse') as (buf: Buffer) => Promise<{ text: string }>
-  const data = await pdfParse(buffer)
-  return data.text
+  const { text } = await extractText(new Uint8Array(buffer))
+  return text.join('\n')
 }
 
 export async function parseDOCX(buffer: Buffer): Promise<string> {
