@@ -64,9 +64,14 @@ export default function Home() {
         )}
 
         {/* Footer */}
-        <p className="text-center text-xs text-muted-foreground mt-10">
-          Kết quả mang tính tham khảo. Hãy tham vấn luật sư cho các quyết định pháp lý quan trọng.
-        </p>
+        <div className="text-center mt-10 space-y-1">
+          <p className="text-xs text-muted-foreground">
+            Kết quả mang tính tham khảo. Hãy tham vấn luật sư cho các quyết định pháp lý quan trọng.
+          </p>
+          <p className="text-xs text-muted-foreground/60">
+            Made by <span className="font-medium text-muted-foreground">Le Pham Phuong Duy</span>
+          </p>
+        </div>
       </div>
     </div>
   )
